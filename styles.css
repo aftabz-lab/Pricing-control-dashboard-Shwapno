@@ -28,3 +28,6 @@ html[data-theme=light]{--canvas:#f3f6f9;--surface:#fff;--surface-alt:#f5f8fb;--s
 .header-snapshot time{font-size:10px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
 .header-snapshot-clock::before{content:" · "}
 @media(max-width:600px){.header-snapshot{margin-right:0;font-size:8px;line-height:1.2}.header-snapshot time{font-size:8px}.header-snapshot time span{display:block}.header-snapshot-clock::before{content:none}}
+
+/* Keep the frozen column headings flush with the detail-window title. */
+#drawerBody{padding-top:0}
