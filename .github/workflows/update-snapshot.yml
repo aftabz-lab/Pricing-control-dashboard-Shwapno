@@ -1,0 +1,110 @@
+name: Refresh snapshot and publish dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '*.html'
+      - '*.css'
+      - '*.js'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'package.json'
+      - '.github/workflows/update-snapshot.yml'
+  schedule:
+    - cron: '2-59/5 * * * *'
+  repository_dispatch:
+    types: [power_bi_report_updated]
+  workflow_dispatch:
+    inputs:
+      force:
+        description: Rebuild even if the source marker is unchanged
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+# Keep a complete in-flight snapshot. A later source check waits its turn.
+concurrency:
+  group: pricing-control-snapshot-and-pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    permissions:
+      contents: write
+    outputs:
+      update_failed: ${{ steps.snapshot.outcome == 'failure' }}
+    env:
+      MAX_SNAPSHOT_AGE_HOURS: '1'
+      FORCE_SNAPSHOT: ${{ github.event_name == 'repository_dispatch' && '1' || github.event_name == 'push' && '1' || inputs.force && '1' || '' }}
+      PBI_EMBED_URL: ${{ vars.PBI_EMBED_URL }}
+      PBI_API_ROOT: ${{ vars.PBI_API_ROOT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify source adapter and snapshot safeguards
+        run: npm test
+      - name: Read complete Power BI snapshot
+        id: snapshot
+        continue-on-error: true
+        shell: bash
+        run: |
+          for attempt in 1 2 3; do
+            if timeout 30m npm run snapshot; then exit 0; fi
+            if [ "$attempt" -lt 3 ]; then sleep $((attempt * 20)); fi
+          done
+          exit 1
+      - name: Commit snapshot or failure status
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          # Successful no-change polls do not create a five-minute commit loop.
+          if ! git diff --quiet -- snapshot.json || [ '${{ steps.snapshot.outcome }}' = 'failure' ]; then
+            git add snapshot.json snapshot-status.json
+            if ! git diff --cached --quiet; then
+              git commit -m 'Update validated pricing snapshot and status'
+              for attempt in 1 2 3 4 5; do
+                if git push origin HEAD:main; then break; fi
+                git fetch origin main
+                git rebase -X theirs origin/main || { git rebase --abort; exit 1; }
+                if [ "$attempt" = '5' ]; then exit 1; fi
+              done
+            fi
+          fi
+      - name: Prepare static Pages artifact
+        run: npm run build
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+      - name: Snapshot summary
+        run: cat snapshot-status.json >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the validated dashboard
+        id: deployment
+        uses: actions/deploy-pages@v4
+      - name: Report a failed source update
+        if: needs.build.outputs.update_failed == 'true'
+        run: |
+          echo 'The source update failed. The last valid dashboard and failure status were published.'
+          exit 1
