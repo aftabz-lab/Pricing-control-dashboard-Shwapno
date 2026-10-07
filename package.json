@@ -1,0 +1,12 @@
+{
+  "name": "shwapno-pricing-control-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "snapshot": "node scripts/update-snapshot.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build-site.mjs"
+  },
+  "engines": {"node": ">=20"}
+}

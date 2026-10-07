@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0b1523">
+  <meta name="description" content="Shwapno management intelligence for over buying price and under sale price, connected to the current RHO and Zonal hierarchy.">
+  <title>Pricing Control · SHWAPNO</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to dashboard</a>
+  <div class="nav-backdrop" id="navBackdrop" hidden></div>
+  <aside class="sidebar" id="sidebar" aria-label="Dashboard navigation">
+    <a class="brand" href="#overview" aria-label="Shwapno Pricing Control"><span class="brand-mark">S</span><span><strong>SHWAPNO</strong><small>OPERATIONS INTELLIGENCE</small></span></a>
+    <p class="nav-label">MANAGEMENT WORKSPACE</p>
+    <nav id="navigation">
+      <button class="nav-item active" data-view="overview" aria-current="page"><span data-icon="overview"></span>Executive overview</button>
+      <button class="nav-item" data-view="leaders"><span data-icon="people"></span>RHO &amp; Zonal</button>
+      <button class="nav-item" data-view="outlets"><span data-icon="store"></span>Outlet exceptions</button>
+      <button class="nav-item" data-view="articles"><span data-icon="box"></span>Article intelligence</button>
+      <button class="nav-item" data-view="supplemental"><span data-icon="layers"></span><span id="supplementalNav">DC comparison</span></button>
+      <button class="nav-item" data-view="source"><span data-icon="clock"></span>Snapshot &amp; rules</button>
+    </nav>
+    <div class="sidebar-bottom"><div class="connected-label"><span class="status-dot"></span>CONNECTED SOURCES</div><a id="powerbiSide" target="_blank" rel="noopener">Power BI report <span>↗</span></a><a id="zoneSide" target="_blank" rel="noopener">Zone Distribution <span>↗</span></a><div class="sidebar-note">One source of truth.<br>Clear ownership. Faster review.</div><p>All amounts in BDT</p></div>
+  </aside>
+  <div class="workspace">
+    <header class="topbar">
+      <div class="topbar-title"><button class="icon-button menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span data-icon="menu"></span></button><div><span class="eyebrow">SHWAPNO · SUPPLY CHAIN</span><div class="workspace-title">Pricing Control <span>Management dashboard</span></div></div></div>
+      <div class="top-actions"><button class="icon-button" id="themeToggle" aria-label="Switch to light mode" title="Switch theme"><span data-icon="sun"></span></button><button class="button" id="refreshButton"><span data-icon="refresh"></span><span>Refresh</span></button><button class="button primary" id="excelButton"><span data-icon="download"></span><span>Management Excel</span></button></div>
+    </header>
+    <main id="main" tabindex="-1">
+      <div class="page-heading"><div><span class="eyebrow">PRICE EXCEPTION INTELLIGENCE</span><h1 id="pageTitle">Executive overview</h1><p id="pageSubtitle">See the exposure. Find the owner. Review the exception.</p></div><div class="snapshot-state" aria-live="polite"><span class="status-dot" id="snapshotDot"></span><div><strong id="snapshotLabel">Loading shared snapshot</strong><span id="snapshotTime">Connecting to the latest published data…</span></div></div></div>
+      <div class="mode-line"><div class="mode-switch" role="group" aria-label="Price exception type"><button class="active" data-mode="buy" aria-pressed="true"><span class="mode-dot amber"></span>Over buying price</button><button data-mode="sale" aria-pressed="false"><span class="mode-dot clay"></span>Under sale price</button></div><div class="scope-meta"><span id="dateWindow">—</span><span class="separator">/</span><span id="grainLabel">Day · Outlet · Article</span></div></div>
+      <section class="filter-panel panel" aria-label="Dashboard filters">
+        <div class="filter-heading"><span><span data-icon="filter"></span><strong>Review scope</strong><span class="pill" id="filterCount">Source defaults</span></span><div><button class="text-button" id="advancedButton" aria-expanded="false" aria-controls="advancedFilters">More filters <span>⌄</span></button><button class="text-button" id="resetButton">Reset all</button></div></div>
+        <div class="filter-grid"><div class="date-control"><label for="period">Period</label><select id="period"><option value="source">Latest source window</option><option value="7">Last 7 source days</option><option value="30">Last 30 source days</option><option value="custom">Custom date range</option></select></div><div class="date-control"><label for="dateFrom">From date</label><input type="date" id="dateFrom"></div><div class="date-control"><label for="dateTo">To date</label><input type="date" id="dateTo"></div><div class="multi-filter" data-filter="regions" data-label="Division / Region"></div><div class="multi-filter" data-filter="rhos" data-label="RHO name"></div><div class="multi-filter" data-filter="zonals" data-label="Zonal name"></div></div>
+        <div class="advanced-grid" id="advancedFilters" hidden><div class="multi-filter" data-filter="outlets" data-label="Outlet code or name"></div><div class="multi-filter" data-filter="masterCategories" data-label="Master category"></div><div class="multi-filter" data-filter="categories" data-label="Subcategory"></div><div class="multi-filter" data-filter="articles" data-label="Article code or name"></div><div class="multi-filter" data-filter="movements" data-label="Movement code"></div><div class="multi-filter" data-filter="purchaseTypes" data-label="Purchase type"></div><div class="date-control"><label for="deviationFloor">Deviation floor (%)</label><input type="number" id="deviationFloor" min="0" max="100" step="1"></div><div class="date-control"><label for="qtyFloor">Quantity floor</label><input type="number" id="qtyFloor" min="0" step="1"></div><div class="filter-apply"><button class="button primary" id="applyButton">Apply review scope</button></div></div>
+        <div class="filter-foot"><span id="filterHint">Linked filters follow the current RHO, Zonal and outlet hierarchy.</span><button class="text-button" id="quickApply">Apply scope <span>→</span></button></div>
+      </section>
+      <div class="notice" id="notice" role="status" hidden></div>
+      <div id="dashboardContent" aria-live="polite"><div class="loading-state"><span class="loading-ring"></span><h2>Preparing the management view</h2><p>Reading the latest validated Power BI snapshot.</p></div></div>
+      <footer class="page-footer"><span>SHWAPNO · Pricing Control</span><span id="footerSource">Source measures · Current outlet hierarchy · Shared snapshots</span></footer>
+    </main>
+  </div>
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="detail-drawer" id="detailDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" hidden><div class="drawer-head"><div><span class="eyebrow">EXCEPTION REVIEW</span><h2 id="drawerTitle">Outlet detail</h2></div><button class="icon-button" id="closeDrawer" aria-label="Close detail"><span data-icon="close"></span></button></div><div id="drawerBody"></div></aside>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
