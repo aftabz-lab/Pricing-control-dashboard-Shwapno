@@ -34,7 +34,15 @@ function isDefault(f){const d=defaults();return f.start===d.start && f.end===d.e
 function notice(message){$('#notice').textContent=message;$('#notice').hidden=!message;}
 function setBusy(value){state.busy=value;for(const id of ['refreshButton','applyButton','quickApply','excelButton'])$('#'+id).disabled=value;$('#applyButton').textContent=value?'Reading source…':'Apply review scope';}
 function status(label,when,kind=''){ $('#snapshotLabel').textContent=label;$('#snapshotTime').textContent=when;$('#snapshotDot').className='status-dot'+(kind?' '+kind:''); }
-function statusCurrent(){status(isDefault(state.applied)?'Shared Power BI snapshot':'Filtered Power BI view',`Power BI refreshed ${timestamp(state.snapshot.sourceTimestamp)} · Snapshot ${timestamp(state.snapshot.generatedAt)}`);}
+function updateHeaderSnapshotTime(){
+  const node=$('#headerSnapshotTime'),value=state.snapshot?.generatedAt,when=new Date(value);
+  if(!value||!Number.isFinite(when.getTime())){node.textContent='—';node.removeAttribute('datetime');node.removeAttribute('title');return;}
+  node.setAttribute('datetime',value);node.title='Snapshot taken '+timestamp(value);
+  const day=when.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Dhaka'});
+  const clock=when.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',hourCycle:'h23',timeZone:'Asia/Dhaka'});
+  node.innerHTML='<span class="header-snapshot-date">'+esc(day)+'</span><span class="header-snapshot-clock">'+esc(clock)+' GMT+6</span>';
+}
+function statusCurrent(){updateHeaderSnapshotTime();status(isDefault(state.applied)?'Shared Power BI snapshot':'Filtered Power BI view',`Power BI refreshed ${timestamp(state.snapshot.sourceTimestamp)} · Snapshot ${timestamp(state.snapshot.generatedAt)}`);}
 function rangeText(v){return date(v.scope.start)+' – '+date(v.scope.end);}
 function counter(){const f=state.filters;let n=Object.entries(f).filter(([k,v])=>Array.isArray(v)&&(k==='masterCategories'?JSON.stringify(v)!==JSON.stringify(defaults().masterCategories):v.length)).length;if(f.period!=='source')n++;if(f.deviationFloor!==defaults().deviationFloor||f.qtyFloor!==defaults().qtyFloor)n++;$('#filterCount').textContent=n?n+' active filter'+(n>1?'s':''):'Source defaults';$('#filterHint').innerHTML=JSON.stringify(state.filters)===JSON.stringify(state.applied)?`${numberLink(number(state.snapshot.organization.rows.length),mappingScenario(numberContext()))} outlet mappings · RHO and Zonal from Zone Distribution`:'Selection changed. Apply scope to update every figure and table.';}
 function fieldOptions(key){

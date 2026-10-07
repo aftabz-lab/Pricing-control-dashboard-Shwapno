@@ -14,3 +14,17 @@ html[data-theme=light]{--canvas:#f3f6f9;--surface:#fff;--surface-alt:#f5f8fb;--s
 .number-link:hover{text-decoration:underline;text-underline-offset:.16em}
 [data-number-link]{cursor:pointer}
 .chart-svg .benchmark-hit{fill:transparent}
+
+/* One detail-window scroll area keeps column headings and the horizontal bar in view. */
+.detail-drawer{display:flex;flex-direction:column;overflow:hidden}
+.detail-drawer .drawer-head{flex:0 0 auto}
+#drawerBody{flex:1 1 auto;min-height:0;overflow:auto;scrollbar-width:auto;scrollbar-color:var(--line-strong) var(--surface-alt)}
+.detail-drawer .table-panel,.detail-drawer .table-wrap{overflow:visible}
+.detail-drawer .table-wrap{max-height:none}
+#drawerBody::-webkit-scrollbar{width:12px;height:14px}
+#drawerBody::-webkit-scrollbar-track,#drawerBody::-webkit-scrollbar-corner{background:var(--surface-alt)}
+#drawerBody::-webkit-scrollbar-thumb{background:var(--line-strong);border:3px solid var(--surface-alt);border-radius:7px}
+.header-snapshot{display:flex;flex-direction:column;align-items:flex-end;flex:0 0 auto;line-height:1.35;margin-right:4px;color:var(--soft);font-size:9px}
+.header-snapshot time{font-size:10px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.header-snapshot-clock::before{content:" · "}
+@media(max-width:600px){.header-snapshot{margin-right:0;font-size:8px;line-height:1.2}.header-snapshot time{font-size:8px}.header-snapshot time span{display:block}.header-snapshot-clock::before{content:none}}
