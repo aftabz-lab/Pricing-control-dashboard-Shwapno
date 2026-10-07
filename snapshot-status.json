@@ -1,10 +1,13 @@
 {
   "version": 1,
-  "result": "failed",
-  "lastCheckedAt": "2026-10-07T22:15:24.633Z",
-  "lastFailureAt": "2026-10-07T22:15:24.633Z",
-  "snapshotGeneratedAt": "2026-10-07T21:54:30.234Z",
+  "result": "updated",
+  "lastCheckedAt": "2026-10-07T22:24:33.575Z",
   "sourceTimestamp": "2026-10-07T12:03:42.72Z",
-  "error": "sale detail rows are missing despite a positive source headline.",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/37694824166"
+  "snapshotGeneratedAt": "2026-10-07T22:24:33.575Z",
+  "sourceReport": "https://app.powerbi.com/view?r=eyJrIjoiNzVlZjhiODktMzJjYy00MmU0LTg2OWQtN2Y2ODhiZTA5ODA3IiwidCI6IjNjZDA3OTg4LTUyNjMtNDA2NC1hZDU1LWU5NTZhYjNkZDExNyIsImMiOjEwfQ%3D%3D",
+  "sourceIncidents": {
+    "buy": 1108,
+    "sale": 576
+  },
+  "hierarchyUpdatedAt": "2026-10-07T13:17:44.424Z"
 }
