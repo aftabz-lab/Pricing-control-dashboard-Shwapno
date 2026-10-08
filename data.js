@@ -23,6 +23,8 @@ export function modeSpecs(client,mode,filters={}) {
   // Measures retain their source formulas. These comparisons select the
   // exception rows identified by the source threshold at the same grain.
   const detail=client.visualSpec(mode,visuals.detail,'detail',filters);
+  const partition={activity:sum(mode==='buy'?'Query3':'Query1',mode==='buy'?'qty_in_unit_of_entry':'ActualInvoicedQuantity')};
+  detail.partition=partition;
   if(mode==='sale'){
     // Restrict the transport to below-floor rows without adding any grouping
     // field that would change the national benchmark. The model's strict
@@ -35,8 +37,8 @@ export function modeSpecs(client,mode,filters={}) {
   const incidentName=mode === 'buy'?'Over Pricing Total Incident':'Under Pricing Total Incident';
   const category={key:'categories',select:[column('DimArticle','Category3','Category'),measure(entity,incidentName,'Incidents')],where:client.scopeWhere(mode,filters),count:30000};
   const specs=[summarySpec(client,mode,filters),client.visualSpec(mode,visuals.summary,'summaryText',filters),category,client.visualSpec(mode,visuals.subCategory,'subcategories',filters),trend,detail];
-  if (mode === 'buy') specs.push(client.visualSpec(mode,visuals.dc,'dc',filters));
-  else specs.push(client.visualSpec(mode,visuals.daily,'daily',filters));
+  if (mode === 'buy') specs.push({...client.visualSpec(mode,visuals.dc,'dc',filters),partition});
+  else specs.push({...client.visualSpec(mode,visuals.daily,'daily',filters),partition});
   return specs;
 }
 export function normalizeDetail(raw, mode) {

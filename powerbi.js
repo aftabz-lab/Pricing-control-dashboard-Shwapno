@@ -26,13 +26,19 @@ async function readJson(url, options = {}) {
   try { return JSON.parse(raw); } catch { throw new Error('Power BI returned an incomplete JSON response. The previous snapshot is retained.'); }
 }
 function mask(value, index) { return Math.floor(Number(value || 0) / 2 ** index) % 2 === 1; }
+function queryError(value, fallback) {
+  const error = new Error(value.message?.value || (typeof value.message === 'string' ? value.message : fallback));
+  error.code = value.code || value.pbi?.error?.code;
+  return error;
+}
+const memoryLimited = error => error?.code === 'rsQueryMemoryLimitExceeded';
 export function decodeResult(entry) {
-  if (entry?.result?.error) throw new Error(JSON.stringify(entry.result.error));
+  if (entry?.result?.error) throw queryError(entry.result.error, JSON.stringify(entry.result.error));
   const data = entry?.result?.data;
   if (!data) throw new Error('Power BI returned no query data.');
   for (const shape of data.dsr?.DataShapes || []) {
     const error = shape['odata.error'] || shape.error;
-    if (error) throw new Error(error.message?.value || error.message || error.code || 'Power BI query failed.');
+    if (error) throw queryError(error, error.code || 'Power BI query failed.');
   }
   const descriptors = data.descriptor?.Select || [];
   const set = data.dsr?.DS?.[0];
@@ -72,6 +78,29 @@ function hasField(value, entity, property) {
   if (value.Column?.Expression?.SourceRef?.Entity === entity && value.Column.Property === property) return true;
   return Object.values(value).some(v => hasField(v,entity,property));
 }
+function expressionIdentity(value) {
+  if (Array.isArray(value)) return value.map(expressionIdentity);
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(Object.entries(value).filter(([key]) => key !== 'Name').sort(([a],[b]) => a.localeCompare(b)).map(([key,item]) => [key,expressionIdentity(item)]));
+}
+function sourceOrder(rows, spec) {
+  const order = (spec.order || []).map(item => ({
+    direction:item.Direction === 2 ? -1 : 1,
+    name:spec.select.find(field => JSON.stringify(expressionIdentity(field)) === JSON.stringify(expressionIdentity(item.Expression)))?.Name,
+  })).filter(item => item.name);
+  if (!order.length) return rows;
+  return rows.sort((a,b) => {
+    for (const item of order) {
+      const x=a[item.name], y=b[item.name];
+      if (x == null && y == null) continue;
+      if (x == null) return 1;
+      if (y == null) return -1;
+      const result=typeof x === 'number' && typeof y === 'number' ? x-y : String(x).localeCompare(String(y));
+      if (result) return result*item.direction;
+    }
+    return 0;
+  });
+}
 function compile(select, where, count, order = []) {
   const entities = new Map();
   function walk(v) {
@@ -102,6 +131,7 @@ export class PricingClient {
       if (process.env.PBI_API_ROOT) this.settings.apiRoot = process.env.PBI_API_ROOT.replace(/\/+$/, '');
     }
     this.key = resourceKey(this.settings.reportUrl);
+    this.partitionedSpecs = new Set();
   }
   async connect() {
     const p = await readJson(`${this.settings.apiRoot}/public/reports/${this.key}/modelsAndExploration?preferReadOnlySession=true`,{headers:headers(this.key)});
@@ -166,14 +196,80 @@ export class PricingClient {
     const order = (query.sortDefinition?.sort || []).map(s => ({Direction:s.direction === 'Descending' ? 2 : 1,Expression:s.field}));
     return {key,select,where,count:30000,order};
   }
+  async partitionMarker() {
+    const p=await readJson(`${this.settings.apiRoot}/public/reports/${this.key}/modelsAndExploration?preferReadOnlySession=true`,{headers:headers(this.key)});
+    const model=p.models?.[0];
+    if (!model || !p.exploration?.report) throw new Error('Power BI report metadata is missing.');
+    return JSON.stringify([model.id,model.dbName,model.LastRefreshTime || p.package?.LastRefreshTime,p.exploration?.explorationContent?.explorationDocument]);
+  }
+  async runPartitioned(spec, complete) {
+    const partition=spec.partition;
+    const columns=spec.select.filter(item => item.Column);
+    if (!columns.length || !partition?.activity) throw new Error('This source query cannot be safely divided.');
+    const marker=await this.partitionMarker();
+    const discoveryKey='__detail_keys_'+spec.key;
+    // Read the exact original grouping keys and filters first. Avoid projecting
+    // all cross-fact measures into the large intermediate result at once.
+    const discovery=await this.run([{key:discoveryKey,
+      select:[...copy(columns),{...copy(partition.activity),Name:'_RecoveryActivity'}],
+      where:copy(spec.where || []),count:5000,
+    }]);
+    const identity=row => JSON.stringify(columns.map(field => row[field.Name] ?? null));
+    const keys=[...new Map(discovery[discoveryKey].map(row => [identity(row),row])).values()];
+    const rows=[];let hasMore=false;
+    async function readPart(client, values) {
+      try {
+        const constraint={Condition:{In:{Expressions:copy(columns),Values:values.map(row => columns.map(field => {
+          const value=row[field.Name];
+          return typeof value==='number' ? literal(`${value}${Number.isInteger(value)?'L':'D'}`) : typeof value==='boolean' ? literal(String(value)) : textLiteral(value);
+        }))}}};
+        const part={...spec,partition:null,count:Math.min(spec.count || 30000,1000),where:[...(spec.where || []),constraint]};
+        const result=await client.run([part],complete);
+        if (complete) {
+          const expected=new Set(values.map(identity)),actual=new Set(result[spec.key].map(identity));
+          if (result[spec.key].length!==expected.size || actual.size!==expected.size || [...actual].some(key => !expected.has(key))) throw new Error('Power BI detail changed while being read. Apply the scope again.');
+        }
+        return {rows:result[spec.key],hasMore:Boolean(result[spec.key+'_hasMore'])};
+      } catch (error) {
+        if (!memoryLimited(error) || values.length < 2) throw error;
+        const middle=Math.ceil(values.length/2);
+        const left=await readPart(client,values.slice(0,middle)),right=await readPart(client,values.slice(middle));
+        return {rows:[...left.rows,...right.rows],hasMore:left.hasMore||right.hasMore};
+      }
+    }
+    // Two bounded requests at a time, with deterministic merge order. Failed
+    // requests never let an incomplete candidate reach the visible dashboard.
+    const partSize=250;
+    for (let offset=0;offset<keys.length;offset+=partSize*2) {
+      const parts=[keys.slice(offset,offset+partSize),keys.slice(offset+partSize,offset+partSize*2)].filter(part => part.length);
+      const results=await Promise.allSettled(parts.map(part => readPart(this,part)));
+      for (const result of results) {
+        if (result.status==='rejected') throw result.reason;
+        rows.push(...result.value.rows);hasMore ||= result.value.hasMore;
+      }
+    }
+    if (marker !== await this.partitionMarker()) throw new Error('Power BI changed while the complete detail was being read. Apply the scope again.');
+    sourceOrder(rows,spec);
+    const count=spec.count || 30000;
+    if (!complete && rows.length>count) {rows.length=count;hasMore=true;}
+    return {rows,hasMore};
+  }
   async run(specs, complete = true) {
     const output = {};
     // A small batch keeps public report queries predictable and avoids one
     // slow detail query holding every card response open.
     for (let offset=0;offset<specs.length;offset+=3) {
       const batch = specs.slice(offset,offset+3);
-      let active = batch.map(spec => ({spec,query:compile(spec.select,spec.where || [],spec.count || 30000,spec.order || []), seen:new Set()}));
+      const identity=spec => JSON.stringify([spec.select,spec.where || [],spec.order || []]);
+      let active = [];
       batch.forEach(s => {output[s.key]=[];});
+      for (const spec of batch) {
+        if (spec.partition && this.partitionedSpecs.has(identity(spec))) {
+          const result=await this.runPartitioned(spec,complete);
+          output[spec.key]=result.rows;
+          if (result.hasMore) output[spec.key+'_hasMore']=true;
+        } else active.push({spec,query:compile(spec.select,spec.where || [],spec.count || 30000,spec.order || []),seen:new Set()});
+      }
       let page = 0;
       while (active.length) {
         if (++page > 400) throw new Error('Power BI detail pagination exceeded the safe limit. The previous snapshot is retained.');
@@ -183,7 +279,16 @@ export class PricingClient {
         const next=[];
         for (let i=0;i<active.length;i++) {
           const a=active[i], entry=payload.results[i];
-          output[a.spec.key].push(...decodeResult(entry));
+          try {output[a.spec.key].push(...decodeResult(entry));}
+          catch (error) {
+            if (!memoryLimited(error) || !a.spec.partition) throw error;
+            this.partitionedSpecs.add(identity(a.spec));
+            const result=await this.runPartitioned(a.spec,complete);
+            // Replace all earlier pages only after a complete retry succeeds.
+            output[a.spec.key]=result.rows;
+            if (result.hasMore) output[a.spec.key+'_hasMore']=true;
+            continue;
+          }
           const token=entry?.result?.data?.dsr?.DS?.[0]?.RT;
           if (token && complete) {
             const signature=JSON.stringify(token);
