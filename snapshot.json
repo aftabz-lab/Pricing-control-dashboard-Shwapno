@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-08T04:14:13.364Z",
+  "generatedAt": "2026-10-08T04:24:33.682Z",
   "sourceTimestamp": "2026-10-07T12:03:42.72Z",
   "sourceReport": "https://app.powerbi.com/view?r=eyJrIjoiNzVlZjhiODktMzJjYy00MmU0LTg2OWQtN2Y2ODhiZTA5ODA3IiwidCI6IjNjZDA3OTg4LTUyNjMtNDA2NC1hZDU1LWU5NTZhYjNkZDExNyIsImMiOjEwfQ%3D%3D",
   "metadataFingerprint": "58e0495479899f2a534c5d111013cf5f85b8c2356036a4e20bc9e47c78120778",
@@ -210004,10 +210004,10 @@
         "IncidentRate": 0.1744836243295675,
         "UnitPrice": 67.56060839610404,
         "Benchmark": 68.710202267264,
-        "SaleMargin": 0.06440610815797486,
-        "SalesQuantity": 2530916.5900000012,
-        "NetSales": 186408984.07000002,
-        "COGS": 161795159.65000007,
+        "SaleMargin": 0.064406108157975,
+        "SalesQuantity": 2530916.5900000017,
+        "NetSales": 186408984.07,
+        "COGS": 161795159.65,
         "ReceivingQuantity": 2536601.318999999,
         "ReceivingCost": 171374328.36999995,
         "SourceText": "For selected date range of 31 Days, Total Sales was 2,530,917. Sale Price was 73.65 and for 1108 incidents, the Sale Margin% was 6.4% vs Average Sale Margin% 13.3%",
@@ -251921,7 +251921,7 @@
       "summary": {
         "Incidents": 576,
         "UnitPrice": 73.67322366362606,
-        "Benchmark": 73.77726993499212,
+        "Benchmark": 73.7772699349921,
         "SalesQuantity": 2554068.7200000025,
         "NetSales": 188147017.89000005,
         "COGS": 163340282.6600001,
@@ -255742,217 +255742,217 @@
           "Day": "Sep 6 Sun",
           "Quantity": 73905.49000000012,
           "UnitPrice": 74.5462830244768,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-07",
           "Day": "Sep 7 Mon",
           "Quantity": 76082.41000000008,
           "UnitPrice": 74.43075895551759,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-08",
           "Day": "Sep 8 Tue",
           "Quantity": 76360.37000000005,
           "UnitPrice": 74.72734279845018,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-09",
           "Day": "Sep 9 Wed",
           "Quantity": 74557.04000000011,
           "UnitPrice": 75.25690432172794,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-10",
           "Day": "Sep 10 Thu",
           "Quantity": 71810.60000000006,
           "UnitPrice": 76.46808192968518,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-11",
           "Day": "Sep 11 Fri",
           "Quantity": 149983.03000000012,
           "UnitPrice": 74.63601053078398,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-12",
           "Day": "Sep 12 Sat",
           "Quantity": 94973.81000000008,
           "UnitPrice": 72.74690109787386,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-13",
           "Day": "Sep 13 Sun",
           "Quantity": 64447.760000000126,
           "UnitPrice": 73.73642166362563,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-14",
           "Day": "Sep 14 Mon",
           "Quantity": 64122.670000000086,
           "UnitPrice": 73.27419458067047,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-15",
           "Day": "Sep 15 Tue",
           "Quantity": 65502.51000000011,
           "UnitPrice": 73.58680168877213,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-16",
           "Day": "Sep 16 Wed",
           "Quantity": 64577.48000000009,
           "UnitPrice": 74.00053680845353,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-17",
           "Day": "Sep 17 Thu",
           "Quantity": 60216.170000000115,
           "UnitPrice": 76.15310995268715,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-18",
           "Day": "Sep 18 Fri",
           "Quantity": 124655.43000000002,
           "UnitPrice": 73.55773878613567,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-19",
           "Day": "Sep 19 Sat",
           "Quantity": 85010.8000000001,
           "UnitPrice": 71.82266536214051,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-20",
           "Day": "Sep 20 Sun",
           "Quantity": 60604.00000000007,
           "UnitPrice": 72.75879766773333,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-21",
           "Day": "Sep 21 Mon",
           "Quantity": 65886.96000000008,
           "UnitPrice": 72.69509517553693,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-22",
           "Day": "Sep 22 Tue",
           "Quantity": 61477.65000000004,
           "UnitPrice": 74.39016276083132,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-23",
           "Day": "Sep 23 Wed",
           "Quantity": 62148.69000000005,
           "UnitPrice": 74.16617760068166,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-24",
           "Day": "Sep 24 Thu",
           "Quantity": 63243.99000000006,
           "UnitPrice": 75.3440725934013,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-25",
           "Day": "Sep 25 Fri",
           "Quantity": 131969.89000000013,
           "UnitPrice": 73.23947135893985,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-26",
           "Day": "Sep 26 Sat",
           "Quantity": 89854.64000000007,
           "UnitPrice": 72.56069228073652,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-27",
           "Day": "Sep 27 Sun",
           "Quantity": 65963.36000000007,
           "UnitPrice": 72.83726967697558,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-28",
           "Day": "Sep 28 Mon",
           "Quantity": 66672.27000000005,
           "UnitPrice": 74.32974692140253,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-29",
           "Day": "Sep 29 Tue",
           "Quantity": 60336.04000000006,
           "UnitPrice": 72.92080071043497,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-09-30",
           "Day": "Sep 30 Wed",
           "Quantity": 75483.58000000012,
           "UnitPrice": 73.64059610092757,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-10-01",
           "Day": "Oct 1 Thu",
           "Quantity": 87238.23000000008,
           "UnitPrice": 74.17173700369173,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-10-02",
           "Day": "Oct 2 Fri",
           "Quantity": 174148.06000000008,
           "UnitPrice": 72.60892767040505,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-10-03",
           "Day": "Oct 3 Sat",
           "Quantity": 114229.79000000012,
           "UnitPrice": 72.86371041010499,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-10-04",
           "Day": "Oct 4 Sun",
           "Quantity": 77976.13000000005,
           "UnitPrice": 73.00107615126242,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-10-05",
           "Day": "Oct 5 Mon",
           "Quantity": 80746.59000000007,
           "UnitPrice": 72.97788113907028,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         },
         {
           "Date": "2026-10-06",
           "Day": "Oct 6 Tue",
           "Quantity": 69883.28000000007,
           "UnitPrice": 72.96371383388835,
-          "Benchmark": 73.77726993499212
+          "Benchmark": 73.7772699349921
         }
       ],
       "detail": [
