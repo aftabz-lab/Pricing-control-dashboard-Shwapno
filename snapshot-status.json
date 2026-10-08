@@ -1,13 +1,13 @@
 {
   "version": 1,
   "result": "updated",
-  "lastCheckedAt": "2026-10-08T06:54:15.560Z",
-  "sourceTimestamp": "2026-10-07T12:03:42.72Z",
-  "snapshotGeneratedAt": "2026-10-08T06:54:15.560Z",
+  "lastCheckedAt": "2026-10-08T06:58:25.512Z",
+  "sourceTimestamp": "2026-10-08T06:28:23.58Z",
+  "snapshotGeneratedAt": "2026-10-08T06:58:25.512Z",
   "sourceReport": "https://app.powerbi.com/view?r=eyJrIjoiNzVlZjhiODktMzJjYy00MmU0LTg2OWQtN2Y2ODhiZTA5ODA3IiwidCI6IjNjZDA3OTg4LTUyNjMtNDA2NC1hZDU1LWU5NTZhYjNkZDExNyIsImMiOjEwfQ%3D%3D",
   "sourceIncidents": {
-    "buy": 1108,
-    "sale": 576
+    "buy": 874,
+    "sale": 2963
   },
   "hierarchyUpdatedAt": "2026-10-07T13:17:44.424Z"
 }
