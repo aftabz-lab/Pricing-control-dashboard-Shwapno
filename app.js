@@ -359,3 +359,18 @@ document.addEventListener('keydown',event=>{
 });
 
 boot();
+
+// SHWAPNO Ask AI: read-only backend data bridge v1.
+if (new URLSearchParams(location.search).get('snapshot-worker') !== '1') window.ShwapnoDashboardData=Object.freeze({version:1,id:'pricing',async read(){
+  if(!state.current||!state.snapshot)throw new Error('Pricing backend data is still loading.');
+  const v=state.current;
+  const facts=sourceMeasures(metricScenario(numberContext())).map(m=>({label:m.label,value:m.type==='ratio'?m.value*100:m.value,unit:m.type==='ratio'?'%':m.type==='money'?'BDT':''}));
+  const withoutNested=list=>list.map(({rows,...r})=>r);
+  return {id:'pricing',ready:true,source:'Pricing Power BI backend: '+(state.mode==='buy'?'Over buying':'Under sale'),snapshot:state.snapshot.generatedAt,scope:'Applied '+state.mode+' scope '+v.scope.start+' to '+v.scope.end+'; original source price/quantity thresholds; all eligible exception records, separate from source incident measures',filters:Object.entries(state.applied).map(([label,value])=>({label,value:Array.isArray(value)?value.join(', '):String(value)})),facts,
+    datasets:[{id:'outlets',title:'Outlet eligible detail summary (not source incident total)',rows:withoutNested(groupDetail(v.detail,'OutletCode')),columns:OUTLET_COLUMNS.map(([key,label])=>({key,label})),identity:['OutletCode','OutletName','RHO','Zonal','Division']},
+      {id:'rhos',title:'RHO accountability',rows:groupRows(v.detail,'RHO'),columns:LEADER_COLUMNS.map(([key,label])=>({key,label})),identity:['Name']},{id:'zonals',title:'Zonal accountability',rows:groupRows(v.detail,'Zonal'),columns:LEADER_COLUMNS.map(([key,label])=>({key,label})),identity:['Name']},
+      {id:'articles',title:'Article eligible detail summary',rows:withoutNested(groupDetail(v.detail,'ArticleCode')),columns:ARTICLE_COLUMNS.map(([key,label])=>({key,label})),identity:['ArticleCode','ArticleName','Category']},
+      {id:'detail',title:'Complete eligible price exception records',rows:v.detail,columns:DETAIL_COLUMNS.map(([key,label])=>({key,label})),identity:['OutletCode','OutletName','RHO','Zonal','ArticleCode','ArticleName','Category'],latest:{field:'Date',label:'exception source day'}},
+      {id:'supplemental',title:state.mode==='buy'?'DC comparison source records':'Daily under-sale source records',rows:v.supplemental,columns:DETAIL_COLUMNS.map(([key,label])=>({key,label})),identity:['OutletCode','OutletName','ArticleCode','ArticleName'],latest:{field:'Date',label:'supplemental source day'}},
+      {id:'categories',title:'Category source incident measures',rows:v.categories,identity:['Category']},{id:'trend',title:'Daily Power BI source chart measures',rows:v.trend,latest:{field:'Date',label:'source day'}}]};
+}});
