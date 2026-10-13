@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-13T03:04:49.642Z",
+  "generatedAt": "2026-10-13T03:14:56.669Z",
   "sourceTimestamp": "2026-10-12T06:17:05.333Z",
   "sourceReport": "https://app.powerbi.com/view?r=eyJrIjoiNzVlZjhiODktMzJjYy00MmU0LTg2OWQtN2Y2ODhiZTA5ODA3IiwidCI6IjNjZDA3OTg4LTUyNjMtNDA2NC1hZDU1LWU5NTZhYjNkZDExNyIsImMiOjEwfQ%3D%3D",
   "metadataFingerprint": "6604a912257a2f41f84fe8428eedf610fdf8674e250b2200cfc3da48a5e1f5c6",
@@ -262582,7 +262582,7 @@
       "summary": {
         "Incidents": 4989,
         "UnitPrice": 95.02359066199242,
-        "Benchmark": 91.02712180608194,
+        "Benchmark": 91.0271218060819,
         "SalesQuantity": 1969731.35,
         "NetSales": 187105671.34999993,
         "COGS": 159161855.84000003,
