@@ -1,13 +1,10 @@
 {
   "version": 1,
-  "result": "updated",
-  "lastCheckedAt": "2026-10-14T06:16:39.657Z",
-  "sourceTimestamp": "2026-10-13T05:45:38.677Z",
+  "result": "failed",
+  "lastCheckedAt": "2026-10-14T06:52:37.611Z",
+  "lastFailureAt": "2026-10-14T06:52:37.611Z",
   "snapshotGeneratedAt": "2026-10-14T06:16:39.657Z",
-  "sourceReport": "https://app.powerbi.com/view?r=eyJrIjoiNzVlZjhiODktMzJjYy00MmU0LTg2OWQtN2Y2ODhiZTA5ODA3IiwidCI6IjNjZDA3OTg4LTUyNjMtNDA2NC1hZDU1LWU5NTZhYjNkZDExNyIsImMiOjEwfQ%3D%3D",
-  "sourceIncidents": {
-    "buy": 508,
-    "sale": 632
-  },
-  "hierarchyUpdatedAt": "2026-10-11T08:42:51.633Z"
+  "sourceTimestamp": "2026-10-13T05:45:38.677Z",
+  "error": "Failed to open the MSOLAP connection.",
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/38521968355"
 }
