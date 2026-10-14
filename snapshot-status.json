@@ -1,10 +1,10 @@
 {
   "version": 1,
   "result": "failed",
-  "lastCheckedAt": "2026-10-14T06:54:25.733Z",
-  "lastFailureAt": "2026-10-14T06:54:25.733Z",
+  "lastCheckedAt": "2026-10-14T15:27:40.579Z",
+  "lastFailureAt": "2026-10-14T15:27:40.579Z",
   "snapshotGeneratedAt": "2026-10-14T06:16:39.657Z",
   "sourceTimestamp": "2026-10-13T05:45:38.677Z",
-  "error": "Failed to open the MSOLAP connection.",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/38523946902"
+  "error": "buy detail rows are missing despite a positive source headline.",
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/38588955479"
 }
