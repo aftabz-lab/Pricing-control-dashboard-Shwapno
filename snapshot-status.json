@@ -1,10 +1,10 @@
 {
   "version": 1,
   "result": "failed",
-  "lastCheckedAt": "2026-10-16T16:39:01.355Z",
-  "lastFailureAt": "2026-10-16T16:39:01.355Z",
+  "lastCheckedAt": "2026-10-17T05:45:58.281Z",
+  "lastFailureAt": "2026-10-17T05:45:58.281Z",
   "snapshotGeneratedAt": "2026-10-14T06:16:39.657Z",
   "sourceTimestamp": "2026-10-13T05:45:38.677Z",
-  "error": "Power BI changed while the snapshot was being built. Retry with a consistent source refresh.",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/38931630707"
+  "error": "Failed to open the MSOLAP connection.",
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/39007335220"
 }
