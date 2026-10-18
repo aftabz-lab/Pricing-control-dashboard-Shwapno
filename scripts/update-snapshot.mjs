@@ -6,12 +6,13 @@ import { loadMode } from '../data.js';
 import { loadOrganization } from '../organization.js';
 import { validateSnapshot, canReplaceSnapshot } from '../snapshot-state.js';
 import { SETTINGS } from '../settings.js';
+import { readStoredSnapshot, writeStoredSnapshot } from './snapshot-files.mjs';
 
 const root=path.resolve(new URL('..',import.meta.url).pathname);
 const statusPath=path.join(root,'snapshot-status.json');
 const hash=value=>createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');
 async function atomic(file,value){const temp=file+'.tmp';await fs.writeFile(temp,JSON.stringify(value,null,2)+'\n');await fs.rename(temp,file);}
-async function existing(file){try{return JSON.parse(await fs.readFile(file,'utf8'));}catch{return null;}}
+async function existing(){try{return await readStoredSnapshot(root);}catch{return null;}}
 function iso(value){return typeof value==='number'?new Date(value).toISOString().slice(0,10):String(value).slice(0,10);}
 export async function fingerprint(client){
   const r=await client.run([{key:'marker',select:[sum('Query1','ActualInvoicedQuantity','SalesQty'),sum('Query1','NSI','NetSales'),sum('Query1','COG(SAP)','COGS'),sum('Query3','qty_in_unit_of_entry','ReceivingQty'),sum('Query3','amt_in_loc_cur','ReceivingAmount')],count:1}]);
@@ -46,7 +47,7 @@ export async function dimensionsFor(client){
   return {articles:[...byArticle.values()],outlets:[...byOutlet.values()],movements:r.movements.map(r=>r.value).filter(v=>v!=null),purchaseTypes:r.purchaseTypes.map(r=>r.value).filter(v=>v!=null),window:{start,end}};
 }
 async function main(){
-  const previous=await existing(path.join(root,'snapshot.json'));
+  const previous=await existing();
   const now=new Date().toISOString();
   console.log('Connecting to published Power BI pricing report.');
   const client=await new PricingClient().connect();
@@ -78,14 +79,14 @@ async function main(){
   const snapshot={version:1,generatedAt:new Date().toISOString(),sourceTimestamp:client.sourceTimestamp,sourceReport:client.settings.reportUrl,metadataFingerprint,dataFingerprint,organization,dimensions,modes};
   validateSnapshot(snapshot);
   if(previous&&!canReplaceSnapshot(snapshot,previous))throw new Error('The proposed snapshot is older than the published data window. The newer snapshot is retained.');
-  await atomic(path.join(root,'snapshot.json'),snapshot);
+  await writeStoredSnapshot(root,snapshot);
   await atomic(statusPath,{version:1,result:'updated',lastCheckedAt:snapshot.generatedAt,sourceTimestamp:snapshot.sourceTimestamp,snapshotGeneratedAt:snapshot.generatedAt,sourceReport:snapshot.sourceReport,sourceIncidents:{buy:modes.buy.summary.Incidents,sale:modes.sale.summary.Incidents},hierarchyUpdatedAt:organization.updatedAt});
   console.log('Complete validated snapshot published locally.');
 }
 if(process.argv[1]&&path.resolve(process.argv[1])===path.resolve(new URL(import.meta.url).pathname)){
   main().catch(async error=>{
     console.error('Snapshot update failed:',error.message);
-    const old=await existing(path.join(root,'snapshot.json'));
+    const old=await existing();
     await atomic(statusPath,{version:1,result:'failed',lastCheckedAt:new Date().toISOString(),lastFailureAt:new Date().toISOString(),snapshotGeneratedAt:old?.generatedAt || null,sourceTimestamp:old?.sourceTimestamp || null,error:error.message,runUrl:process.env.GITHUB_SERVER_URL&&process.env.GITHUB_REPOSITORY&&process.env.GITHUB_RUN_ID?`${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}`:null});
     process.exitCode=1;
   });
