@@ -3,6 +3,7 @@ import { PricingClient } from './powerbi.js';
 import { loadOrganization, enrich } from './organization.js';
 import { loadMode, totals, groupRows } from './data.js';
 import { validateSnapshot, canReplaceSnapshot } from './snapshot-state.js';
+import { fetchSharedSnapshot } from './snapshot-storage.js?v=snapshot-parts-v1-20261018';
 import { exportManagement, saveCsv, groupDetail, LEADER_COLUMNS, OUTLET_COLUMNS, ARTICLE_COLUMNS, DETAIL_COLUMNS } from './export.js';
 import { captureContext, metricScenario, groupScenario, rowScenario, ownershipScenario, trendScenario, mappingScenario, scenarioRows, scenarioTotals, sourceMeasures } from './number-details.js';
 
@@ -229,7 +230,7 @@ function closeDrawer(){if($('#detailDrawer').hidden)return;$('#detailDrawer').hi
 function theme(value){document.documentElement.dataset.theme=value;try{localStorage.setItem('shwapno-pricing-theme',value);}catch{}$('#themeToggle').innerHTML=icon(value==='dark'?'sun':'moon');$('#themeToggle').setAttribute('aria-label',`Switch to ${value==='dark'?'light':'dark'} mode`);}
 function nav(open){$('#sidebar').classList.toggle('open',open);$('#navBackdrop').hidden=!open;$('#menuToggle').setAttribute('aria-expanded',String(open));}
 function reEnrichSnapshot(snap,org){snap.organization=org;for(const m of Object.values(snap.modes)){for(const k of ['detail','supplemental','outlets'])m[k]=enrich(m[k],org);}return snap;}
-async function readShared(){const response=await fetch('./snapshot.json?refresh='+Date.now(),{cache:'no-store',signal:AbortSignal.timeout(45000)});if(!response.ok)throw new Error('Shared snapshot request failed ('+response.status+').');return validateSnapshot(await response.json());}
+async function readShared(){return fetchSharedSnapshot();}
 function remember(){
   try{
     // Store the complete two-mode result with only the source-default article
