@@ -71,6 +71,7 @@ jobs:
           # Successful no-change polls do not create a five-minute commit loop.
           if ! git diff --quiet -- snapshot.json || [ '${{ steps.snapshot.outcome }}' = 'failure' ]; then
             git add snapshot.json snapshot-status.json
+            if [ -d snapshot-parts ]; then git add -A -- snapshot-parts; fi
             if ! git diff --cached --quiet; then
               git commit -m 'Update validated pricing snapshot and status'
               for attempt in 1 2 3 4 5; do
