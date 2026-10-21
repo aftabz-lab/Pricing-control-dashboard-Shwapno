@@ -1,10 +1,10 @@
 {
   "version": 1,
   "result": "failed",
-  "lastCheckedAt": "2026-10-21T10:56:25.713Z",
-  "lastFailureAt": "2026-10-21T10:56:25.713Z",
+  "lastCheckedAt": "2026-10-21T11:06:22.221Z",
+  "lastFailureAt": "2026-10-21T11:06:22.222Z",
   "snapshotGeneratedAt": "2026-10-21T10:17:15.135Z",
   "sourceTimestamp": "2026-10-19T05:35:57.5Z",
   "error": "Power BI returned an incomplete query batch.",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/39587940661"
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/39589169428"
 }
