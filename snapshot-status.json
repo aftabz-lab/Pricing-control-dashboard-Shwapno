@@ -1,13 +1,10 @@
 {
   "version": 1,
-  "result": "updated",
-  "lastCheckedAt": "2026-10-22T20:17:58.666Z",
-  "sourceTimestamp": "2026-10-19T05:35:57.5Z",
+  "result": "failed",
+  "lastCheckedAt": "2026-10-22T20:41:24.577Z",
+  "lastFailureAt": "2026-10-22T20:41:24.577Z",
   "snapshotGeneratedAt": "2026-10-22T20:17:58.666Z",
-  "sourceReport": "https://app.powerbi.com/view?r=eyJrIjoiNzVlZjhiODktMzJjYy00MmU0LTg2OWQtN2Y2ODhiZTA5ODA3IiwidCI6IjNjZDA3OTg4LTUyNjMtNDA2NC1hZDU1LWU5NTZhYjNkZDExNyIsImMiOjEwfQ%3D%3D",
-  "sourceIncidents": {
-    "buy": 1544,
-    "sale": 2279
-  },
-  "hierarchyUpdatedAt": "2026-10-11T08:42:51.633Z"
+  "sourceTimestamp": "2026-10-19T05:35:57.5Z",
+  "error": "Power BI changed while the snapshot was being built. Retry with a consistent source refresh.",
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/39848502394"
 }
