@@ -6,13 +6,13 @@ import { loadMode } from '../data.js';
 import { loadOrganization } from '../organization.js';
 import { validateSnapshot, canReplaceSnapshot } from '../snapshot-state.js';
 import { SETTINGS } from '../settings.js';
-import { readStoredSnapshot, writeStoredSnapshot } from './snapshot-files.mjs';
+import { readStoredSnapshotMetadata, writeStoredSnapshot } from './snapshot-files.mjs';
 
 const root=path.resolve(new URL('..',import.meta.url).pathname);
 const statusPath=path.join(root,'snapshot-status.json');
 const hash=value=>createHash('sha256').update(typeof value==='string'?value:JSON.stringify(value)).digest('hex');
 async function atomic(file,value){const temp=file+'.tmp';await fs.writeFile(temp,JSON.stringify(value,null,2)+'\n');await fs.rename(temp,file);}
-async function existing(){try{return await readStoredSnapshot(root);}catch{return null;}}
+async function existing(){try{return await readStoredSnapshotMetadata(root);}catch{return null;}}
 function iso(value){return typeof value==='number'?new Date(value).toISOString().slice(0,10):String(value).slice(0,10);}
 export async function fingerprint(client){
   const r=await client.run([{key:'marker',select:[sum('Query1','ActualInvoicedQuantity','SalesQty'),sum('Query1','NSI','NetSales'),sum('Query1','COG(SAP)','COGS'),sum('Query3','qty_in_unit_of_entry','ReceivingQty'),sum('Query3','amt_in_loc_cur','ReceivingAmount')],count:1}]);
