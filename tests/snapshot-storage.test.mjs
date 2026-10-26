@@ -4,9 +4,9 @@ import fs from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { SNAPSHOT_PART_BYTES, packSnapshot, unpackSnapshot, snapshotPartFiles, fetchSharedSnapshot } from '../snapshot-storage.js';
+import { SNAPSHOT_PART_BYTES, packSnapshot, packRecordSnapshot, unpackSnapshot, snapshotPartFiles, fetchSharedSnapshot } from '../snapshot-storage.js';
 import { canReplaceSnapshot } from '../snapshot-state.js';
-import { readStoredSnapshot, writeStoredSnapshot } from '../scripts/snapshot-files.mjs';
+import { readStoredSnapshot, readStoredSnapshotMetadata, writeStoredSnapshot } from '../scripts/snapshot-files.mjs';
 import { buildSite } from '../scripts/build-site.mjs';
 
 const project = fileURLToPath(new URL('..', import.meta.url));
@@ -129,8 +129,11 @@ test('A failed part write leaves the previously published snapshot unchanged', a
   await writeStoredSnapshot(root, original, 256);
   const oldIndex = await fs.readFile(path.join(root, 'snapshot.json'), 'utf8');
   const next = sample('2026-10-18T08:00:00Z', 'A new snapshot');
-  const packed = await packSnapshot(next, 256);
-  await fs.mkdir(path.join(root, packed.parts[0].file));
+  const packed = await packRecordSnapshot(next, 256);
+  const prior = new Set(snapshotPartFiles(JSON.parse(oldIndex)));
+  const changed = packed.parts.find(part => !prior.has(part.file));
+  assert.ok(changed);
+  await fs.mkdir(path.join(root, changed.file));
   await assert.rejects(writeStoredSnapshot(root, next, 256));
   assert.equal(await fs.readFile(path.join(root, 'snapshot.json'), 'utf8'), oldIndex);
   assert.deepEqual(await readStoredSnapshot(root), canonical(original));
@@ -151,4 +154,147 @@ test('Pages build includes current and retained parts and rejects incomplete dat
   await fs.rm(path.join(root, index.parts[0].file));
   await assert.rejects(buildSite(root), /ENOENT/);
   assert.deepEqual(await readStoredSnapshot(path.join(root, '_site')), canonical(next));
+});
+
+test('Record batches preserve every field, row order, nested value and exact number without serializing the full snapshot', async () => {
+  const original = sample();
+  const rows = Array.from({ length: 75 }, (_, i) => ({ ...original.modes.sale.detail[0],
+    ArticleCode: String(i).padStart(9, '0'), Nested: [null, undefined, 'a\\b\n"😀', { value: -0 }],
+    Quantity: i / 8, Amount: -1234567890.125, Optional: undefined }));
+  original.modes.sale.supplemental = rows;
+  original.dimensions.extra = { empty: [], nested: [1, null, false, ['one', 'two']] };
+  const expected = canonical(original);
+  const stringify = JSON.stringify;
+  const guarded = new Set([original, original.modes, original.modes.sale, rows]);
+  JSON.stringify = function(value, ...args) {
+    assert.equal(guarded.has(value), false, 'A full snapshot or dataset must not be stringified');
+    return stringify(value, ...args);
+  };
+  try {
+    const { index, parts } = await packRecordSnapshot(original, 1024);
+    assert.equal(index.storageFormat, 'shwapno-pricing-snapshot-records-v2');
+    assert.ok(parts.length > 10);
+    assert.ok(parts.every(part => part.bytes <= 1024 && part.rawBytes <= 1024));
+    assert.ok(parts.some(part => part.encoding === 'gzip'));
+    assert.deepEqual(await unpackSnapshot(index, partReader(parts)), expected);
+  } finally { JSON.stringify = stringify; }
+});
+
+test('Record format rejects missing, truncated, corrupted, reordered and altered metadata or row counts', async () => {
+  const original = sample();
+  original.modes.sale.supplemental = Array.from({ length: 30 }, (_, i) => ({ ...original.modes.sale.detail[0], ArticleCode: String(i) }));
+  const { index, parts } = await packRecordSnapshot(original, 512);
+  const read = partReader(parts);
+  await assert.rejects(unpackSnapshot(index, async () => { throw new Error('Missing batch'); }), /Missing batch/);
+  await assert.rejects(unpackSnapshot(index, async file => (await read(file)).subarray(1)), /incomplete or corrupted/);
+  await assert.rejects(unpackSnapshot(index, async file => {
+    const content = new Uint8Array(await read(file)); content[0] ^= 1; return content;
+  }), /incomplete or corrupted/);
+  await assert.rejects(unpackSnapshot({ ...index, parts: [...index.parts].reverse() }, read), /do not match|incomplete/);
+  const changed = structuredClone(index);
+  changed.snapshot.modes.sale.scope.qtyFloor = 0;
+  await assert.rejects(unpackSnapshot(changed, read), /do not match/);
+  const shortened = structuredClone(index);
+  shortened.arrays.at(-1).length++;
+  await assert.rejects(unpackSnapshot(shortened, read), /incomplete/);
+  let requests = 0;
+  const unsafe = structuredClone(index);
+  unsafe.arrays[0].path = ['constructor', 'prototype', 'rows'];
+  await assert.rejects(unpackSnapshot(unsafe, async () => { requests++; }), /invalid array path/);
+  assert.equal(requests, 0);
+});
+
+test('Record batch row counts, encoding, decompressed sizes and source metadata are verified after integrity checks', async () => {
+  const { index, parts } = await packRecordSnapshot(sample(), 512);
+  const read = partReader(parts);
+  async function resign(value) {
+    const { sha256, retainedParts, ...document } = value;
+    const hash = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(document)));
+    value.sha256 = Buffer.from(hash).toString('hex');
+    return value;
+  }
+  const expanded = structuredClone(index);
+  expanded.parts[0].rawBytes++;
+  await assert.rejects(unpackSnapshot(await resign(expanded), read), /incomplete or corrupted/);
+  const wrongCount = structuredClone(index);
+  wrongCount.parts[0].records++;
+  wrongCount.arrays[0].length++;
+  await assert.rejects(unpackSnapshot(await resign(wrongCount), read), /incomplete/);
+  const wrongEncoding = structuredClone(index);
+  wrongEncoding.parts[0].encoding = 'unknown';
+  await assert.rejects(unpackSnapshot(wrongEncoding, read), /invalid data part/);
+  const differentUpdate = structuredClone(index);
+  differentUpdate.generatedAt = '2026-10-19T00:00:00Z';
+  await assert.rejects(unpackSnapshot(await resign(differentUpdate), read), /different update/);
+});
+
+test('Browser record loader preserves source calculations with four concurrent reads and fails on a missing batch', async () => {
+  const original = sample();
+  original.modes.sale.supplemental = Array.from({ length: 50 }, (_, i) => ({ ...original.modes.sale.detail[0], ArticleCode: String(i) }));
+  const { index, parts } = await packRecordSnapshot(original, 512);
+  const read = partReader(parts);
+  let active = 0, peak = 0, reads = 0;
+  const loaded = await fetchSharedSnapshot(async url => {
+    const file = url.replace(/^\.\//, '').split('?')[0];
+    if (file === 'snapshot.json') return { ok: true, json: async () => index };
+    active++; reads++; peak = Math.max(peak, active);
+    await new Promise(resolve => setImmediate(resolve)); active--;
+    return { ok: true, arrayBuffer: () => read(file) };
+  });
+  assert.deepEqual(loaded, canonical(original));
+  assert.equal(reads, parts.length);
+  assert.ok(peak <= 4);
+  await assert.rejects(fetchSharedSnapshot(async url => url.includes('snapshot.json')
+    ? { ok: true, json: async () => index } : { ok: false, status: 404 }), /404/);
+  const older = sample('2026-10-17T08:00:00Z');
+  assert.equal(canReplaceSnapshot(older, loaded), false);
+});
+
+test('A byte-split snapshot migrates to record batches while retaining every prior file and value', async t => {
+  const root = await temporary(t);
+  const old = sample();
+  const legacy = await packSnapshot(old, 256);
+  await fs.mkdir(path.join(root, 'snapshot-parts'));
+  for (const part of legacy.parts) await fs.writeFile(path.join(root, part.file), part.content);
+  await fs.writeFile(path.join(root, 'snapshot.json'), JSON.stringify(legacy.index));
+  const next = sample('2026-10-18T08:00:00Z');
+  const index = await writeStoredSnapshot(root, next, 512);
+  assert.deepEqual(await readStoredSnapshot(root), canonical(next));
+  for (const file of snapshotPartFiles(legacy.index)) assert.ok(snapshotPartFiles(index, true).includes(file));
+  assert.deepEqual(await unpackSnapshot(legacy.index, file => fs.readFile(path.join(root, file))), canonical(old));
+});
+
+test('An oversized or invalid row never replaces the last valid snapshot', async t => {
+  const root = await temporary(t);
+  await writeStoredSnapshot(root, sample(), 512);
+  const before = await fs.readFile(path.join(root, 'snapshot.json'), 'utf8');
+  const next = sample('2026-10-18T08:00:00Z');
+  next.modes.sale.detail[0].ArticleName = 'x'.repeat(1024);
+  await assert.rejects(writeStoredSnapshot(root, next, 512), /record exceeds/);
+  assert.equal(await fs.readFile(path.join(root, 'snapshot.json'), 'utf8'), before);
+  assert.deepEqual(await readStoredSnapshot(root), canonical(sample()));
+});
+
+test('Update metadata releases old datasets after full validation and preserves all replacement decisions', async t => {
+  const root = await temporary(t);
+  const current = sample();
+  current.organization.updatedAt = '2026-10-18T06:00:00Z';
+  const index = await writeStoredSnapshot(root, current, 512);
+  const metadata = await readStoredSnapshotMetadata(root);
+  assert.deepEqual({ generatedAt: metadata.generatedAt, sourceTimestamp: metadata.sourceTimestamp,
+    sourceReport: metadata.sourceReport, metadataFingerprint: metadata.metadataFingerprint,
+    dataFingerprint: metadata.dataFingerprint, organization: metadata.organization, modes: metadata.modes },
+  { generatedAt: current.generatedAt, sourceTimestamp: current.sourceTimestamp,
+    sourceReport: current.sourceReport, metadataFingerprint: current.metadataFingerprint,
+    dataFingerprint: current.dataFingerprint, organization: { updatedAt: current.organization.updatedAt },
+    modes: { buy: { scope: current.modes.buy.scope }, sale: { scope: current.modes.sale.scope } } });
+  const candidates = [sample('2026-10-18T08:00:00Z'), sample('2026-10-18T06:00:00Z'),
+    { ...sample('2026-10-18T08:00:00Z'), sourceTimestamp: '2026-10-16T00:00:00Z' }];
+  const shorterWindow = sample('2026-10-18T08:00:00Z');
+  shorterWindow.modes.sale.scope.end = '2026-10-16'; candidates.push(shorterWindow);
+  for (const candidate of candidates) {
+    assert.equal(canReplaceSnapshot(candidate, metadata), canReplaceSnapshot(candidate, current));
+  }
+  await fs.rm(path.join(root, index.parts[0].file));
+  await assert.rejects(readStoredSnapshotMetadata(root), /ENOENT/);
 });
