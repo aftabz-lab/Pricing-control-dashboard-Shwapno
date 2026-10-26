@@ -1,10 +1,10 @@
 {
   "version": 1,
   "result": "failed",
-  "lastCheckedAt": "2026-10-26T08:47:22.691Z",
-  "lastFailureAt": "2026-10-26T08:47:22.691Z",
+  "lastCheckedAt": "2026-10-26T08:52:37.113Z",
+  "lastFailureAt": "2026-10-26T08:52:37.113Z",
   "snapshotGeneratedAt": "2026-10-26T06:21:30.639Z",
   "sourceTimestamp": "2026-10-19T05:35:57.5Z",
   "error": "Invalid string length",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/40291983131"
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/40294305654"
 }
