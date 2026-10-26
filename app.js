@@ -3,7 +3,7 @@ import { PricingClient } from './powerbi.js';
 import { loadOrganization, enrich } from './organization.js';
 import { loadMode, totals, groupRows } from './data.js';
 import { validateSnapshot, canReplaceSnapshot } from './snapshot-state.js';
-import { fetchSharedSnapshot } from './snapshot-storage.js?v=snapshot-parts-v1-20261018';
+import { fetchSharedSnapshot } from './snapshot-storage.js?v=snapshot-records-v2-20261026';
 import { exportManagement, saveCsv, groupDetail, LEADER_COLUMNS, OUTLET_COLUMNS, ARTICLE_COLUMNS, DETAIL_COLUMNS } from './export.js';
 import { captureContext, metricScenario, groupScenario, rowScenario, ownershipScenario, trendScenario, mappingScenario, scenarioRows, scenarioTotals, sourceMeasures } from './number-details.js';
 
