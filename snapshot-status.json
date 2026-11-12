@@ -1,10 +1,10 @@
 {
   "version": 1,
   "result": "failed",
-  "lastCheckedAt": "2026-11-12T10:40:46.900Z",
-  "lastFailureAt": "2026-11-12T10:40:46.900Z",
+  "lastCheckedAt": "2026-11-12T10:54:38.727Z",
+  "lastFailureAt": "2026-11-12T10:54:38.727Z",
   "snapshotGeneratedAt": "2026-11-12T10:25:37.934Z",
   "sourceTimestamp": "2026-11-12T08:15:25.097Z",
   "error": "The operation was aborted due to timeout",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/43200019732"
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/43201900941"
 }
