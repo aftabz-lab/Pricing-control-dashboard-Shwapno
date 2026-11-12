@@ -1,10 +1,13 @@
 {
   "version": 1,
-  "result": "failed",
-  "lastCheckedAt": "2026-11-12T11:28:22.314Z",
-  "lastFailureAt": "2026-11-12T11:28:22.314Z",
-  "snapshotGeneratedAt": "2026-11-12T10:25:37.934Z",
+  "result": "updated",
+  "lastCheckedAt": "2026-11-12T11:57:06.000Z",
   "sourceTimestamp": "2026-11-12T08:15:25.097Z",
-  "error": "The operation was aborted due to timeout",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/43205861770"
+  "snapshotGeneratedAt": "2026-11-12T11:57:06.000Z",
+  "sourceReport": "https://app.powerbi.com/view?r=eyJrIjoiNzVlZjhiODktMzJjYy00MmU0LTg2OWQtN2Y2ODhiZTA5ODA3IiwidCI6IjNjZDA3OTg4LTUyNjMtNDA2NC1hZDU1LWU5NTZhYjNkZDExNyIsImMiOjEwfQ%3D%3D",
+  "sourceIncidents": {
+    "buy": 2257,
+    "sale": 3264
+  },
+  "hierarchyUpdatedAt": "2026-11-03T10:42:31.813Z"
 }
