@@ -1,10 +1,10 @@
 {
   "version": 1,
   "result": "failed",
-  "lastCheckedAt": "2026-11-21T23:16:31.517Z",
-  "lastFailureAt": "2026-11-21T23:16:31.517Z",
+  "lastCheckedAt": "2026-11-21T23:22:26.799Z",
+  "lastFailureAt": "2026-11-21T23:22:26.799Z",
   "snapshotGeneratedAt": "2026-11-21T23:08:08.892Z",
   "sourceTimestamp": "2026-11-18T05:29:46.453Z",
   "error": "sale detail rows are missing despite a positive source headline.",
-  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/44960525479"
+  "runUrl": "https://github.com/aftabz-lab/Pricing-control-dashboard-Shwapno/actions/runs/44960761137"
 }
